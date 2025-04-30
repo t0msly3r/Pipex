@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
-SRC = src/main.c
+CFLAGS = -Wall -Wextra -Werror -g
+SRC = src/pipex.c
 OBJ = $(SRC:.c=.o)
 NAME = pipex
 LIB_DIR = lib
