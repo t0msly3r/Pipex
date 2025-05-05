@@ -6,7 +6,7 @@
 /*   By: tfiz-ben <tfiz-ben@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:33:38 by tfiz-ben          #+#    #+#             */
-/*   Updated: 2025/04/30 15:35:58 by tfiz-ben         ###   ########.fr       */
+/*   Updated: 2025/05/05 12:54:57 by tfiz-ben         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,8 +148,15 @@ int main(int argc, char **argv, char **envp)
 	if (pid == 0)
 		child_process(pipefd, argv, envp); // Child process
 	close(pipefd[1]); // Close write end in parent
-	waitpid(pid, NULL, 0); // Wait for child process to finish
-	father_process(pipefd, argv, envp); // Parent process
+	waitpid(pid, NULL, 0); // Wait for first child process to finish
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("fork");
+		exit(EXIT_FAILURE);
+	}
+	if (pid == 0)
+		father_process(pipefd, argv, envp); // Parent becomes child process
 	close(pipefd[0]); // Close read end in parent
-	return (0);
+	waitpid(pid, NULL, 0); // Wait for second child process to finish
 }
