@@ -12,78 +12,6 @@
 
 #include "../include/pipex.h"
 
-void	ft_free_split(char **split)
-{
-	int i = 0;
-
-	if (!split)
-		return;
-	while (split[i])
-	{
-		free(split[i]);
-		i++;
-	}
-	free(split);
-}
-
-char *get_path(char **envp, char *cmd)
-{
-	char	**paths;
-	char	*tmp;
-	char	*full_path;
-	int		i = 0;
-
-	while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
-		i++;
-	if (!envp[i])
-		return (NULL);
-	paths = ft_split(envp[i] + 5, ':');
-	if (!paths)
-		return (NULL);
-	i = 0;
-	while (paths[i])
-	{
-		tmp = ft_strjoin(paths[i], "/");
-		full_path = ft_strjoin(tmp, cmd);
-		free(tmp);
-		if (access(full_path, X_OK) == 0)
-		{
-			ft_free_split(paths);
-			return (full_path);
-		}
-		free(full_path);
-		i++;
-	}
-	ft_free_split(paths);
-	return (NULL);
-}
-
-void	exec(char *argv, char **envp)
-{
-	char	*full_path;
-	char	**tmp;
-	
-	tmp = ft_split(argv, ' ');
-	if (!tmp)
-	{
-		perror("ft_split");
-		exit(EXIT_FAILURE);
-	}
-	full_path = get_path(envp, tmp[0]);
-	if (!full_path)
-	{
-		perror("get_path");
-		ft_free_split(tmp);
-		exit(EXIT_FAILURE);
-	}
-	if (execve(full_path, tmp, envp) == -1)
-	{
-		perror("execve");
-		ft_free_split(tmp);
-		exit(EXIT_FAILURE);
-	}
-}
-
 void	child_process(int *pipefd, char **argv, char **envp)
 {
 	int		infile_fd;
@@ -126,37 +54,29 @@ void	father_process(int *pipefd, char **argv, char **envp)
 
 int main(int argc, char **argv, char **envp)
 {
-	if (argc != 5)
-	{
-		fprintf(stderr, "Usage: %s <infile> <cmd1> <cmd2> <outfile>\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
-	int		pipefd[2]; // Pipe file descriptors
-	pid_t	pid; // Process ID
+    if (argc != 5)
+    {
+        fprintf(stderr, "Usage: %s <infile> <cmd1> <cmd2> <outfile>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    int     pipefd[2];
+    pid_t   pid;
 
-	if (pipe(pipefd) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
-	pid = fork(); // Create a new process
-	if (pid == -1)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE);
-	}
-	if (pid == 0)
-		child_process(pipefd, argv, envp); // Child process
-	close(pipefd[1]); // Close write end in parent
-	waitpid(pid, NULL, 0); // Wait for first child process to finish
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE);
-	}
-	if (pid == 0)
-		father_process(pipefd, argv, envp); // Parent becomes child process
-	close(pipefd[0]); // Close read end in parent
-	waitpid(pid, NULL, 0); // Wait for second child process to finish
+    if (pipe(pipefd) == -1)
+    {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    pid = fork();
+    if (pid == -1)
+    {
+        perror("fork");
+        close(pipefd[0]);
+        close(pipefd[1]);
+        exit(EXIT_FAILURE);
+    }
+    if (pid == 0)
+        process_first_command(pipefd, argv, envp);
+    waitpid(pid, NULL, 0);
+    process_second_command(pipefd, argv, envp);
 }

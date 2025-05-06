@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g
-SRC = src/pipex.c
+CFLAGS = -Wall -Wextra -Werror -fsanitize=address
+SRC = src/pipex.c src/utils.c
 OBJ = $(SRC:.c=.o)
 NAME = pipex
 LIB_DIR = lib
