@@ -6,42 +6,17 @@
 /*   By: tfiz-ben <tfiz-ben@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 15:07:31 by tfiz-ben          #+#    #+#             */
-/*   Updated: 2025/04/30 15:16:23 by tfiz-ben         ###   ########.fr       */
+/*   Updated: 2025/05/07 13:18:01 by tfiz-ben         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/pipex.h"
 
-void	exec(char *argv, char **envp)
+char	*find_env_path(char **envp)
 {
-	char	*full_path;
-	char	**tmp;
-	
-	tmp = ft_split(argv, ' ');
-	if (!tmp)
-	{
-		perror("ft_split");
-		exit(EXIT_FAILURE);
-	}
-	full_path = get_path(envp, tmp[0]);
-	if (!full_path)
-	{
-		perror("get_path");
-		ft_free_split(tmp);
-		exit(EXIT_FAILURE);
-	}
-	if (execve(full_path, tmp, envp) == -1)
-	{
-		perror("execve");
-		ft_free_split(tmp);
-		exit(EXIT_FAILURE);
-	}
-}
+	int	i;
 
-char *find_env_path(char **envp)
-{
-	int i = 0;
-	
+	i = 0;
 	while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
 		i++;
 	if (!envp[i])
@@ -49,22 +24,23 @@ char *find_env_path(char **envp)
 	return (envp[i] + 5);
 }
 
-char *build_full_path(char *dir, char *cmd)
+char	*build_full_path(char *dir, char *cmd)
 {
-	char *tmp;
-	char *full_path;
-	
+	char	*tmp;
+	char	*full_path;
+
 	tmp = ft_strjoin(dir, "/");
 	full_path = ft_strjoin(tmp, cmd);
 	free(tmp);
 	return (full_path);
 }
 
-char *check_paths(char **paths, char *cmd)
+char	*check_paths(char **paths, char *cmd)
 {
-	int i = -1;
-	char *full_path;
-	
+	int		i;
+	char	*full_path;
+
+	i = -1;
 	while (paths[++i])
 	{
 		full_path = build_full_path(paths[i], cmd);
@@ -80,12 +56,12 @@ char *check_paths(char **paths, char *cmd)
 	return (NULL);
 }
 
-char *get_path(char **envp, char *cmd)
+char	*get_path(char **envp, char *cmd)
 {
-	char **paths;
-	char *env_path;
-	char *result;
-	
+	char	**paths;
+	char	*env_path;
+	char	*result;
+
 	env_path = find_env_path(envp);
 	if (!env_path)
 		return (NULL);
@@ -100,10 +76,11 @@ char *get_path(char **envp, char *cmd)
 
 void	ft_free_split(char **split)
 {
-	int i = 0;
+	int	i;
 
+	i = 0;
 	if (!split)
-		return;
+		return ;
 	while (split[i])
 	{
 		free(split[i]);
