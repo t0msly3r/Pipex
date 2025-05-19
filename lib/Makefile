@@ -36,4 +36,6 @@ fclean: clean
 
 re: fclean all
 
-
+run:
+	@$(CC) $(CFLAGS) main.c -o hola $(OBJ) -L. -lft
+	@echo "Ejecutable creado"

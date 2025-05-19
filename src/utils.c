@@ -6,7 +6,7 @@
 /*   By: tfiz-ben <tfiz-ben@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 15:07:31 by tfiz-ben          #+#    #+#             */
-/*   Updated: 2025/05/07 13:18:01 by tfiz-ben         ###   ########.fr       */
+/*   Updated: 2025/05/19 13:24:33 by tfiz-ben         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ char	*check_paths(char **paths, char *cmd)
 			return (NULL);
 		if (access(full_path, X_OK) == 0)
 		{
-			ft_free_split(paths);
 			return (full_path);
 		}
 		free(full_path);
@@ -69,8 +68,7 @@ char	*get_path(char **envp, char *cmd)
 	if (!paths)
 		return (NULL);
 	result = check_paths(paths, cmd);
-	if (!result)
-		ft_free_split(paths);
+	ft_free_split(paths);
 	return (result);
 }
 

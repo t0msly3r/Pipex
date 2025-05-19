@@ -6,7 +6,7 @@
 /*   By: tfiz-ben <tfiz-ben@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:33:38 by tfiz-ben          #+#    #+#             */
-/*   Updated: 2025/05/16 13:58:49 by tfiz-ben         ###   ########.fr       */
+/*   Updated: 2025/05/19 15:34:25 by tfiz-ben         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,22 +88,27 @@ int	main(int argc, char **argv, char **envp)
 	// 	ft_putstr_fd("Usage: ./pipex infile cmd1 cmd2 outfile\n", 2);
 	// 	exit(EXIT_FAILURE);
 	// }
-	check_error(argc, argv, envp);
-	if (pipe(pipefd) == -1)
+	if (check_error(argc, argv, envp))
 	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
+		if (pipe(pipefd) == -1)
+		{
+			perror("pipe");
+			exit(EXIT_FAILURE);
+		}
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork");
+			close(pipefd[0]);
+			close(pipefd[1]);
+			exit(EXIT_FAILURE);
+		}
+		if (pid == 0)
+			child_process(pipefd, argv, envp);
+		waitpid(pid, NULL, 0);
+		father_process(pipefd, argv, envp);
 	}
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		close(pipefd[0]);
-		close(pipefd[1]);
-		exit(EXIT_FAILURE);
-	}
-	if (pid == 0)
-		child_process(pipefd, argv, envp);
-	waitpid(pid, NULL, 0);
-	father_process(pipefd, argv, envp);
+	else
+		create_doc(argv);
+	
 }
